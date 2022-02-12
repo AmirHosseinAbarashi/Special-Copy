@@ -1,4 +1,6 @@
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class CopyDirectory {
 
@@ -34,7 +36,7 @@ public class CopyDirectory {
         if (source.isDirectory()) {                             // source is a directory
             copyDirectory(source, destination);
         } else {                                                // source is a file
-            copyFile(source, destination);
+            Files.copy(source.toPath(), destination.toPath());
         }
     }
 
@@ -47,18 +49,6 @@ public class CopyDirectory {
                 copyDirectoryCompatibityMode(new File(sourceDirectory, f), destinationDirectory);
             else                                                   // if f is a file
                 copyDirectoryCompatibityMode(new File(sourceDirectory, f), new File(destinationDirectory, f));
-        }
-    }
-
-    private void copyFile(File sourceFile, File destinationFile)      // copy file
-            throws IOException {
-        try (InputStream in = new FileInputStream(sourceFile);
-             OutputStream out = new FileOutputStream(destinationFile)) {
-            byte[] buf = new byte[1024];
-            int length;
-            while ((length = in.read(buf)) > 0) {
-                out.write(buf, 0, length);
-            }
         }
     }
 
