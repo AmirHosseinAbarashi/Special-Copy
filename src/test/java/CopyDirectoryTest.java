@@ -1,37 +1,42 @@
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class CopyDirectoryTest {
 
-    CopyDirectory copyDirectory = new CopyDirectory();
-
-    @Test
-    void testFilesCopy1() throws IOException {
-        copyDirectory.setIn("test-file\\test-in\\folder1");
-        copyDirectory.setOut("test-file\\test-out");
+    @ParameterizedTest
+    @ValueSource(strings = {"/folder1", "/folder2", ""})
+    void testFilesCopy1(String subDirectory) throws IOException {
+        String pathIn = "test-file/test-in" + subDirectory;
+        String pathOut = Files.createTempDirectory("copyTest").toString();
+        CopyDirectory copyDirectory = new CopyDirectory(pathIn, pathOut);
         copyDirectory.copy();
-        assertTrue(copyDirectory.checkFiles(copyDirectory.getFileIn(), copyDirectory.getFileOut()));
-        copyDirectory.deleteFiles(copyDirectory.getFileOut());
+        assertCopied(pathIn, pathOut);
+        deleteFiles(new File(pathOut));
+        Files.delete(Paths.get(pathOut));
     }
 
-    @Test
-    void testFileCopy2() throws IOException {
-        copyDirectory.setIn("test-file\\test-in\\folder2");
-        copyDirectory.setOut("test-file\\test-out");
-        copyDirectory.copy();
-        assertTrue(copyDirectory.checkFiles(copyDirectory.getFileIn(), copyDirectory.getFileOut()));
-        copyDirectory.deleteFiles(copyDirectory.getFileOut());
+    private void assertCopied(String sourceDirectoryPath, String destinationDirectoryPath) {     // test
+        File sourceDirectory = new File(sourceDirectoryPath);
+        File destinationDirectory = new File(destinationDirectoryPath);
+
+        for (String f : Objects.requireNonNull(sourceDirectory.list())) {
+            if (new File(sourceDirectory, f).isDirectory())
+                assertCopied(new File(sourceDirectory, f).toString(), destinationDirectory.toString());
+            else if (!new File(destinationDirectory, f).exists())
+                fail(f + " did not exist in destination!");
+        }
     }
 
-    @Test
-    void testFileCopy3() throws IOException {
-        copyDirectory.setIn("test-file\\test-in");
-        copyDirectory.setOut("test-file\\test-out");
-        copyDirectory.copy();
-        assertTrue(copyDirectory.checkFiles(copyDirectory.getFileIn(), copyDirectory.getFileOut()));
-        copyDirectory.deleteFiles(copyDirectory.getFileOut());
+    private void deleteFiles(File file) throws IOException {                        // Delete all files in a folder [test]
+        for (String f : Objects.requireNonNull(file.list()))
+            Files.delete(new File(file, f).toPath());
     }
 }
