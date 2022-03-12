@@ -16,13 +16,36 @@ public class CopyDirectory {
         fileOut = new File(String.valueOf(out));
     }
 
-    public void copy() throws IOException {
-        copyDirectoryCompatibilityMode(fileIn, fileOut);
+    public void copy() {
+        for (String f : Objects.requireNonNull(fileIn.list())) {
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        copyDirectoryCompatibilityMode(new File(fileIn , f) , fileOut);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                private void copyDirectoryCompatibilityMode(File source, File destination) throws IOException {
+                    logger.info("copying " + source + " to " + destination);
+                    if (source.isDirectory()) {                             // source is a directory
+                        copyDirectory(source, destination);
+                    } else {                                                // source is a file
+                        Files.copy(source.toPath(), destination.toPath());
+                    }
+                }
+
+
+            });
+            t.start();
+        }
     }
 
     private void copyDirectoryCompatibilityMode(File source, File destination) throws IOException {
         logger.info("copying " + source + " to " + destination);
-        if (!source.isFile()) {                             // source is a directory
+        if (source.isDirectory()) {                             // source is a directory
             copyDirectory(source, destination);
         } else {                                                // source is a file
             Files.copy(source.toPath(), destination.toPath());
