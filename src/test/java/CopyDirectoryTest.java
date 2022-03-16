@@ -13,7 +13,7 @@ class CopyDirectoryTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/folder1", "/folder2", ""})
-    void testFilesCopy1(String subDirectory) throws IOException {
+    void testFilesCopy1(String subDirectory) throws IOException, InterruptedException {
         String pathIn = "test-file/test-in" + subDirectory;
         String pathOut = Files.createTempDirectory("copyTest").toString();
         CopyDirectory copyDirectory = new CopyDirectory(pathIn, pathOut);
