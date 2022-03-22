@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -13,11 +14,11 @@ class CopyDirectoryTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/folder1", "/folder2", ""})
-    void testFilesCopy1(String subDirectory) throws IOException, InterruptedException {
+    void testFilesCopy1(String subDirectory) throws IOException, InterruptedException, ExecutionException {
         String pathIn = "test-file/test-in" + subDirectory;
         String pathOut = Files.createTempDirectory("copyTest").toString();
-        CopyDirectory copyDirectory = new CopyDirectory(pathIn, pathOut);
-        copyDirectory.copy();
+        CopyDirectory copyDirectory = new CopyDirectory();
+        copyDirectory.copy(pathIn, pathOut);
         assertCopied(pathIn, pathOut);
         deleteFiles(new File(pathOut));
         Files.delete(Paths.get(pathOut));
