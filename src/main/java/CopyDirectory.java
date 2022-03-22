@@ -1,26 +1,17 @@
 import java.io.File;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class CopyDirectory {
 
-    private final File fileIn;
-    private final File fileOut;
     ExecutorService es = Executors.newFixedThreadPool(4);
 
-    public CopyDirectory(String in, String out) {
-        fileIn = new File(String.valueOf(in));
-        fileOut = new File(String.valueOf(out));
-    }
-
-    public void copy() throws InterruptedException {
-        for (String f : Objects.requireNonNull(fileIn.list())) {
-            Runnable runnable = new CopyDirectoryThread(fileIn, fileOut, f);
-            es.execute(runnable);
+    public void copy(String sourceDirectory, String destinationDirectory) throws ExecutionException, InterruptedException {
+        for (String f : Objects.requireNonNull(new File(sourceDirectory).list())) {
+            Callable<Void> callable = new CopyDirectoryThread(sourceDirectory, destinationDirectory, f);
+            Future<Void> tasks = es.submit(callable);
+            tasks.get();
         }
         es.shutdown();
-        es.awaitTermination(30000, TimeUnit.MILLISECONDS);
     }
 }
