@@ -19,6 +19,7 @@ class CopyDirectoryTest {
         String pathOut = Files.createTempDirectory("copyTest").toString();
         CopyDirectory copyDirectory = new CopyDirectory();
         copyDirectory.copy(pathIn, pathOut);
+        Thread.sleep(100);
         assertCopied(pathIn, pathOut);
         deleteFiles(new File(pathOut));
         Files.delete(Paths.get(pathOut));
