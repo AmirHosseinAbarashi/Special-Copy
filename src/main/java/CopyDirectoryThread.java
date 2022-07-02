@@ -19,7 +19,7 @@ public class CopyDirectoryThread implements Callable<Void> {
     }
 
     @Override
-    public synchronized Void call() throws Exception {
+    public Void call() throws Exception {
         if (new File(fileIn, f).isDirectory()) {
             try {
                 copyDirectoryCompatibilityMode(new File(fileIn, f), new File(fileOut));
